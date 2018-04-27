@@ -4,7 +4,7 @@ _pkgbase=gnome-shell-extension-desktop-icons
 pkgname=$_pkgbase-reworked
 pkgver=0.1
 pkgrel=1
-_commit=f070ff03eb5e135a0ec3a0581ab6d1a2b8a19425
+_commit=77e5048bc972b7fe2f7049c54cd3464d770c323a
 pkgdesc="Add icons to the desktop"
 arch=('any')
 url="https://github.com/Ste74/org.gnome.desktop-icons-reworked"
@@ -13,16 +13,9 @@ depends=('gnome-shell' 'gnome-shell-extensions')
 conflicts=("$_pkgbase")
 options=('!strip')
 source=("$url/archive/$_commit.tar.gz")
-sha512sums=('09056007db3e93b268788fd1edb61252629c7c99a15f142616da69869e9ba3272093e8f26785d5b68f63130cf307ad0f131e8f0dcf6c740d2b408a4cb11af027')
-
-build() {
-	cd org.gnome.desktop-icons-reworked-$_commit
-    mkdir -p build
-    cd build
-    cmake ../
-    make
-}
+sha512sums=('8894b6325fdce220078eff04e7c9d2d5aefaf0b2867b733076bfd4b945e8e7dcbf9d8338945a94ed8dbedf88d33fa3d93094fa720edcefb693ae0512c82fc861')
 
 package() {
-    make -C build DESTDIR="$pkgdir" install
+	cd org.gnome.desktop-icons-reworked-$_commit
+    make -C PREFIX=/usr DESTDIR=${pkgdir} install_common
 }
