@@ -15,7 +15,13 @@ options=('!strip')
 source=("$url/archive/$_commit.tar.gz")
 sha512sums=('8894b6325fdce220078eff04e7c9d2d5aefaf0b2867b733076bfd4b945e8e7dcbf9d8338945a94ed8dbedf88d33fa3d93094fa720edcefb693ae0512c82fc861')
 
+build() {
+    mkdir -p ${srcdir}/build
+    cd ${srcdir}/build
+    cmake ../${pkgname}
+    make
+}
+
 package() {
-	cd org.gnome.desktop-icons-reworked-$_commit
-    make -C PREFIX=/usr DESTDIR=${pkgdir} install_common
+    make -C build DESTDIR="${pkgdir}" install
 }
