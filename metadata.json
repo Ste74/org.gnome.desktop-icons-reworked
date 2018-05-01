@@ -1,1 +1,10 @@
-{"name": "Desktop Icons", "description": "Add icons to the desktop", "uuid": "org.gnome.desktop-icons", "shell-version": ["3.26.0"]}
+{
+    "name": "Desktop Icons", 
+    "description": "Add icons to the desktop",
+    "uuid": "org.gnome.desktop-icons",
+    "shell-version": [
+        "3.26.0",
+        "3.28"
+    ],
+    "version": 0.2
+}
