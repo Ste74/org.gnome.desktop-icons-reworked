@@ -1,7 +1,7 @@
 {
     "name": "Desktop Icons", 
     "description": "Add icons to the desktop",
-    "uuid": "org.gnome.desktop-icons",
+    "uuid": "org.gnome-shell.desktop-icons",
     "shell-version": [
         "3.26.0",
         "3.28"
