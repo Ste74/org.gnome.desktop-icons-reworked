@@ -1,6 +1,6 @@
 Install this extension either as
 
- ~/.local/share/gnome-shell/extensions/org.gnome.desktop-icons
+ ~/.local/share/gnome-shell/extensions/org.gnome-shell.desktop-icons
 
 or as
 
