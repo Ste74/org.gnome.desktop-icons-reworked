@@ -791,8 +791,15 @@ const DesktopManager = new Lang.Class(
         while ((info = fileEnum.next_file(null)))
         {
             let file = fileEnum.get_child(info);
-            let fileContainer = new FileContainer(file, info);
-            this._fileContainers.push(fileContainer);
+            if(file!=null)
+            {
+              let fileContainer = new FileContainer(file, info);
+              this._fileContainers.push(fileContainer);	
+            }
+            else
+            {
+              log("Skipping unexpected null file");
+            }
         }
 
         this._desktopContainers.forEach(Lang.bind(this,
