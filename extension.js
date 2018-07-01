@@ -54,6 +54,7 @@ const Pango = imports.gi.Pango;
 const Meta = imports.gi.Meta;
 
 const Signals = imports.signals;
+const Mainloop = imports.mainloop;
 
 const Animation = imports.ui.animation;
 const Background = imports.ui.background;
@@ -70,6 +71,8 @@ const Queue = Me.imports.queue;
 const Util = imports.misc.util;
 const Gtk = imports.gi.Gtk;
 const GnomeDesktop = imports.gi.GnomeDesktop;
+
+const Convenience = Me.imports.convenience;
 
 const ICON_SIZE = 64;
 const ICON_MAX_WIDTH = 130;
@@ -732,6 +735,10 @@ const DesktopManager = new Lang.Class(
 
     _init: function()
     {
+        this._settings = Convenience.getSettings();
+        this._loadSettings();
+        this._connectSettings();
+
         this._layoutChildrenId = 0;
         this._desktopEnumerateCancellable = null;
         this._desktopContainers = [];
@@ -747,6 +754,22 @@ const DesktopManager = new Lang.Class(
         this._dragXStart = Number.POSITIVE_INFINITY;
         this._dragYStart = Number.POSITIVE_INFINITY;
         this._setMetadataCancellable = new Gio.Cancellable();
+    },
+
+    _connectSettings: function() {
+        this._settings.connect(
+          'changed::hide-dotfiles', Lang.bind(this, this._toggleDotfiles)
+        );
+    },
+
+    _loadSettings: function() {
+        this._hidedotfiles = this._settings.get_boolean('hide-dotfiles');
+    },
+
+    _toggleDotfiles: function() {
+        this._loadSettings();
+        this._destroyDesktopIcons();
+        this._addDesktopIcons();
     },
 
     _addDesktopIcons: function()
@@ -811,7 +834,11 @@ const DesktopManager = new Lang.Class(
             if(file!=null)
             {
               let fileContainer = new FileContainer(file, info);
-              this._fileContainers.push(fileContainer);	
+              
+              if (!this._hidedotfiles)
+                this._fileContainers.push(fileContainer); 
+              else if (!info.get_name().startsWith("."))
+                this._fileContainers.push(fileContainer); 
             }
             else
             {
@@ -1369,6 +1396,7 @@ function removeBackgroundMenu()
 
 function init()
 {
+    Convenience.initTranslations();
 }
 
 let desktopManager = null;
@@ -1382,7 +1410,7 @@ function reload()
 
 function enable()
 {
-    GLib.timeout_add_seconds(null, 4, function() {
+    Mainloop.timeout_add_seconds(4, () => {
         removeBackgroundMenu();
         desktopManager = new DesktopManager();
         return false;
