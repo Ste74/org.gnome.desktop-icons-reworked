@@ -38,6 +38,13 @@
                   thumbnails.
  */
 
+ /*
+  * 1.07.2018 dady8889@github.com
+  * Fixed drag and drop errors
+  * Fixed inaccurate opening of files/folders
+  * Fixed interaction with "Dash to Dock" extension delaying the load (i know, this is a bad fix)
+  */
+
 const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
@@ -250,8 +257,19 @@ const FileContainer = new Lang.Class (
             this._buttonPressInitialY = y;
 
             let clickTime = new Date().getTime();
-            if (clickTime - lastTime < clickPeriod) this._onOpenClicked();
+            if (clickTime - lastTime < clickPeriod && lastItem == this)
+            {
+                this._onOpenClicked();
+
+                lastItem = null;
+                lastTime = clickTime;
+
+                return Clutter.EVENT_STOP;
+            }
+
+            lastItem = this;
             lastTime = clickTime;
+
             return Clutter.EVENT_STOP;
         }
 
@@ -447,8 +465,7 @@ const DesktopContainer = new Lang.Class(
 
     _onRefreshClicked: function()
     {
-        disable();
-        enable();
+        reload();
     },
 
     _createDesktopBackgroundMenu: function()
@@ -859,7 +876,7 @@ const DesktopManager = new Lang.Class(
         {
             let children = this._desktopContainers[i].actor.get_children();
 
-            if(children.indexOf(this._selection[0].actor) != -1)
+            if(this._selection.length > 0 && children.indexOf(this._selection[0].actor) != -1)
             {
                 desktopContainer = this._desktopContainers[i];
                 break;
@@ -1043,7 +1060,8 @@ const DesktopManager = new Lang.Class(
                              */
                             if (fileContainers.filter(w => w.file.get_uri() == placeholder._delegate.file.get_uri()).length == 0)
                             {
-                                result = dropDesktopContainer.findEmptyPlace(left, top);
+                                let result = desktopContainer.findEmptyPlace(left, top);
+
                                 if (result == null)
                                 {
                                     log("WARNING: No empty space in the desktop for another icon");
@@ -1355,10 +1373,20 @@ function init()
 
 let desktopManager = null;
 
-function enable()
+function reload()
 {
+    disable();
     removeBackgroundMenu();
     desktopManager = new DesktopManager();
+}
+
+function enable()
+{
+    GLib.timeout_add_seconds(null, 4, function() {
+        removeBackgroundMenu();
+        desktopManager = new DesktopManager();
+        return false;
+    });
 }
 
 function disable()
@@ -1370,6 +1398,7 @@ function disable()
     }
 }
 
+let lastItem = null;
 let lastTime = new Date().getTime();
 let backend = Clutter.get_default_backend();
 let clickPeriod = backend.get_double_click_time();
