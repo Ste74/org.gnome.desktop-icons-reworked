@@ -38,6 +38,13 @@
                   thumbnails.
  */
 
+ /*
+  * 1.07.2018 dady8889@github.com
+  * Fixed drag and drop errors
+  * Fixed inaccurate opening of files/folders
+  * Fixed interaction with "Dash to Dock" extension delaying the load (i know, this is a bad fix)
+  */
+
 const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
@@ -47,6 +54,7 @@ const Pango = imports.gi.Pango;
 const Meta = imports.gi.Meta;
 
 const Signals = imports.signals;
+const Mainloop = imports.mainloop;
 
 const Animation = imports.ui.animation;
 const Background = imports.ui.background;
@@ -63,6 +71,8 @@ const Queue = Me.imports.queue;
 const Util = imports.misc.util;
 const Gtk = imports.gi.Gtk;
 const GnomeDesktop = imports.gi.GnomeDesktop;
+
+const Convenience = Me.imports.convenience;
 
 const ICON_SIZE = 64;
 const ICON_MAX_WIDTH = 130;
@@ -250,8 +260,19 @@ const FileContainer = new Lang.Class (
             this._buttonPressInitialY = y;
 
             let clickTime = new Date().getTime();
-            if (clickTime - lastTime < clickPeriod) this._onOpenClicked();
+            if (clickTime - lastTime < clickPeriod && lastItem == this)
+            {
+                this._onOpenClicked();
+
+                lastItem = null;
+                lastTime = clickTime;
+
+                return Clutter.EVENT_STOP;
+            }
+
+            lastItem = this;
             lastTime = clickTime;
+
             return Clutter.EVENT_STOP;
         }
 
@@ -447,8 +468,7 @@ const DesktopContainer = new Lang.Class(
 
     _onRefreshClicked: function()
     {
-        disable();
-        enable();
+        reload();
     },
 
     _createDesktopBackgroundMenu: function()
@@ -715,6 +735,10 @@ const DesktopManager = new Lang.Class(
 
     _init: function()
     {
+        this._settings = Convenience.getSettings();
+        this._loadSettings();
+        this._connectSettings();
+
         this._layoutChildrenId = 0;
         this._desktopEnumerateCancellable = null;
         this._desktopContainers = [];
@@ -730,6 +754,22 @@ const DesktopManager = new Lang.Class(
         this._dragXStart = Number.POSITIVE_INFINITY;
         this._dragYStart = Number.POSITIVE_INFINITY;
         this._setMetadataCancellable = new Gio.Cancellable();
+    },
+
+    _connectSettings: function() {
+        this._settings.connect(
+          'changed::hide-dotfiles', Lang.bind(this, this._toggleDotfiles)
+        );
+    },
+
+    _loadSettings: function() {
+        this._hidedotfiles = this._settings.get_boolean('hide-dotfiles');
+    },
+
+    _toggleDotfiles: function() {
+        this._loadSettings();
+        this._destroyDesktopIcons();
+        this._addDesktopIcons();
     },
 
     _addDesktopIcons: function()
@@ -794,7 +834,11 @@ const DesktopManager = new Lang.Class(
             if(file!=null)
             {
               let fileContainer = new FileContainer(file, info);
-              this._fileContainers.push(fileContainer);	
+              
+              if (!this._hidedotfiles)
+                this._fileContainers.push(fileContainer); 
+              else if (!info.get_name().startsWith("."))
+                this._fileContainers.push(fileContainer); 
             }
             else
             {
@@ -859,7 +903,7 @@ const DesktopManager = new Lang.Class(
         {
             let children = this._desktopContainers[i].actor.get_children();
 
-            if(children.indexOf(this._selection[0].actor) != -1)
+            if(this._selection.length > 0 && children.indexOf(this._selection[0].actor) != -1)
             {
                 desktopContainer = this._desktopContainers[i];
                 break;
@@ -1043,7 +1087,8 @@ const DesktopManager = new Lang.Class(
                              */
                             if (fileContainers.filter(w => w.file.get_uri() == placeholder._delegate.file.get_uri()).length == 0)
                             {
-                                result = dropDesktopContainer.findEmptyPlace(left, top);
+                                let result = desktopContainer.findEmptyPlace(left, top);
+
                                 if (result == null)
                                 {
                                     log("WARNING: No empty space in the desktop for another icon");
@@ -1351,14 +1396,25 @@ function removeBackgroundMenu()
 
 function init()
 {
+    Convenience.initTranslations();
 }
 
 let desktopManager = null;
 
-function enable()
+function reload()
 {
+    disable();
     removeBackgroundMenu();
     desktopManager = new DesktopManager();
+}
+
+function enable()
+{
+    Mainloop.timeout_add_seconds(4, () => {
+        removeBackgroundMenu();
+        desktopManager = new DesktopManager();
+        return false;
+    });
 }
 
 function disable()
@@ -1370,6 +1426,7 @@ function disable()
     }
 }
 
+let lastItem = null;
 let lastTime = new Date().getTime();
 let backend = Clutter.get_default_backend();
 let clickPeriod = backend.get_double_click_time();

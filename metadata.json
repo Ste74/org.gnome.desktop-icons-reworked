@@ -2,9 +2,11 @@
     "name": "Desktop Icons", 
     "description": "Add icons to the desktop",
     "uuid": "org.gnome-shell.desktop-icons",
+    "gettext-domain": "desktop-icons",
+    "settings-schema": "org.gnome.shell.extensions.desktop-icons",
     "shell-version": [
         "3.26.0",
         "3.28"
     ],
-    "version": 0.2
+    "version": 0.3
 }
