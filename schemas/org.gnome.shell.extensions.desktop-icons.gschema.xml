@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="gnome-shell-extensions">
-  <schema path="/org/gnome/shell/extensions/desktop-icons/" id="org.gnome.shell.extensions.desktop-icons">
-    <key name="hide-dotfiles" type="b">
-      <default>true</default>
-      <summary>Hide dot files</summary>
-    </key>
-  </schema>
-</schemalist>
