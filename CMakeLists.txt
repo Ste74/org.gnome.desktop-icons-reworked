@@ -16,4 +16,4 @@ install(FILES extension.js
 install(DIRECTORY schemas
         DESTINATION ${EXT_INSTALL_DIR}/${EXT_DIR}/)
 
-install(CODE "EXECUTE_PROCESS(COMMAND glib-compile-schemas ${DESTDIR}${EXT_INSTALL_DIR}/${EXT_DIR}/schemas)")
+install(CODE "EXECUTE_PROCESS(COMMAND glib-compile-schemas ${EXT_INSTALL_DIR}/${EXT_DIR}/schemas)")
