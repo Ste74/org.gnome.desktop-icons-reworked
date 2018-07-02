@@ -13,7 +13,6 @@ install(FILES extension.js
         stylesheet.css
         DESTINATION ${EXT_INSTALL_DIR}/${EXT_DIR}/)
 
-install(DIRECTORY schemas
-        DESTINATION ${EXT_INSTALL_DIR}/${EXT_DIR}/)
+add_subdirectory(schemas)
 
 install(CODE "EXECUTE_PROCESS(COMMAND glib-compile-schemas ${EXT_INSTALL_DIR}/${EXT_DIR}/schemas)")
