@@ -23,8 +23,4 @@ R.F. Buser ( forum@archlinux.org )
 * Show properties
 
 ## Installation
-git clone https://github.com/dady8889/org.gnome.desktop-icons-reworked  
-cd org.gnome.desktop-icons-reworked  
-cmake -H. -Bbuild  
-cd build  
 sudo make install
