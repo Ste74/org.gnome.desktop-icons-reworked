@@ -1,7 +1,7 @@
 # Basic Makefile with bits inspired by dash-to-dock
 
 UUID=org.gnome-shell.desktop-icons
-GSCHEMA_FILE=org.gnome-shell.desktop-icons.gschema.xml
+GSCHEMA_FILE=org.gnome.shell.extensions.desktop-icons.gschema.xml
 
 GIT_HEAD=$(shell git rev-parse HEAD)
 LAST_RELEASE=$(shell git describe --abbrev=0 --tags --match v[0-9]*)
@@ -26,6 +26,7 @@ else
 endif
 
 JS=*.js
+UI=*.ui
 MD=*.md
 CSS=*.css
 JSON=*.json
@@ -86,7 +87,7 @@ compile:
 
 build: compile
 	mkdir -p ./build
-	cp $(JS) $(CSS) $(JSON) $(MD) $(TXT) ./build
+	cp $(JS) $(CSS) $(JSON) $(MD) $(UI) ./build
 	cp -r $(DIRS) ./build
 
 	sed -i 's/"version": -1/"version": "$(VERSION)"/'  build/metadata.json;
