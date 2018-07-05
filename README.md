@@ -22,5 +22,9 @@ R.F. Buser ( forum@archlinux.org )
 * Select all
 * Show properties
 
-## Installation
-sudo make install
+## Local installation
+make install
+
+## System wide installation
+sudo make install INSTALL=system
+
