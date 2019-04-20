@@ -1,3 +1,6 @@
+# Now this project is not necessary since gnome developer release an official complete extension 
+( https://gitlab.gnome.org/World/ShellExtensions/desktop-icons )
+
 # org.gnome.desktop-icons-reworked
 
 gnome-shell-extension-desktop-icons
